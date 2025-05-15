@@ -1,11 +1,12 @@
-// src/components/UploadForm.jsx
 import React, { useState } from 'react';
 
 const UploadForm = () => {
   const [resume, setResume] = useState(null);
   const [jobDesc, setJobDesc] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [result, setResult] = useState(null);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!resume) {
@@ -22,8 +23,26 @@ const UploadForm = () => {
     formData.append('resume', resume);
     formData.append('jobDescription', jobDesc);
 
-    // 🔁 You’ll replace this with actual backend API call
-    console.log('Uploading resume and job description...', formData);
+    setLoading(true);
+    setResult(null);
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/analyze-resume`, {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to analyze resume');
+      }
+
+      const data = await response.json();
+      setResult(data);
+    } catch (err) {
+      alert(err.message || 'Something went wrong');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -41,7 +60,9 @@ const UploadForm = () => {
 
       {/* Job Description Textarea */}
       <div>
-        <label className="block font-medium mb-2">Job Description <span className="text-red-500">*</span></label>
+        <label className="block font-medium mb-2">
+          Job Description <span className="text-red-500">*</span>
+        </label>
         <textarea
           rows="6"
           placeholder="Paste the job description here..."
@@ -55,9 +76,21 @@ const UploadForm = () => {
       <button
         type="submit"
         className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
+        disabled={loading}
       >
-        Analyze Resume
+        {loading ? 'Analyzing...' : 'Analyze Resume'}
       </button>
+
+      {loading && <p className="text-blue-600 mt-4">Analyzing your resume...</p>}
+
+      {result && (
+        <div className="mt-6 p-4 border rounded bg-gray-50">
+          <h3 className="text-lg font-semibold mb-2">Analysis Result:</h3>
+          <pre className="whitespace-pre-wrap text-sm text-gray-700">
+            {JSON.stringify(result, null, 2)}
+          </pre>
+        </div>
+      )}
     </form>
   );
 };

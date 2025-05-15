@@ -1,4 +1,3 @@
-// src/pages/Upload.jsx
 import React from 'react';
 import UploadForm from '../components/UploadForm';
 
