@@ -27,7 +27,7 @@ const UploadForm = () => {
     setResult(null);
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/analyze-resume`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/api/resume/analyze`, {
         method: 'POST',
         body: formData,
       });
